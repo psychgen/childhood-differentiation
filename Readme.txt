@@ -1,5 +1,5 @@
 
-This folder contains the scripts needed to prepare data and run analyses 
+This contains the scripts needed to prepare data and run analyses 
 for the paper: "Beyond the "p" factor: exploring the role of symptom 
 differentiation across childhood in the emergence of psychopathology".
 
