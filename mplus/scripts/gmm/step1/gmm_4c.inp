@@ -1,0 +1,33 @@
+TITLE: gmm_4c
+DATA: FILE = "//tsd-evs/p471/data/durable/projects/childhood_differentiation/
+scripts/mplus/data/data_for_mplus.dat";
+VARIABLE: 
+NAMES = ind_id m_id sex parity BARN_NR inat_8yr hyp_8yr cd_8yr odd_8yr dep_8yr anx_8yr
+     f_predis m_prestr m_pststr m_pstdep m_rxp f_rxp age1 age2 age3 f_stress m_alcpr
+     dx_dep dx_anx dx_dbd dx_adhd mf_edu mf_inc m_alcrisk f_alcrisk f_smok m_smok
+     m_dist m_predis diff1 diff2 diff3 tot1 tot2 tot3; 
+MISSING=.;
+USEVARIABLES= diff1 diff2 diff3;
+AUXILIARY= inat_8yr hyp_8yr cd_8yr odd_8yr dep_8yr anx_8yr
+     f_predis m_prestr m_pststr m_pstdep m_rxp f_rxp  
+	 sex parity age1 age2 age3 
+	 f_stress m_alcpr dx_dep dx_anx dx_dbd dx_adhd mf_edu mf_inc 
+	 m_alcrisk f_alcrisk f_smok m_smok m_dist m_predis;
+IDVARIABLE= ind_id;
+CLUSTER=m_id;
+CLASSES= Cc (4);
+
+ANALYSIS: type=complex mixture; estimator=MLR; STARTS= 500 20;
+
+MODEL:
+%OVERALL%
+
+i1 s1 | diff1@-3.5 diff2@-2 diff3@0;
+
+i1@0;
+s1@0;
+
+output:  sampstat stdyx TECH1 TECH11 SVALUES ENTROPY;
+
+savedata: FILE IS gmm_4c.dat; 
+SAVE IS CPROB;
