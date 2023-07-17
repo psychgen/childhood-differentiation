@@ -9,7 +9,7 @@
 
 # read in processed data from 00_data_preparation.R
 
-  load("./data/processed_data.RData")
+  load("./data/processed_data_new.RData")
 
 # specify basic LGMs
 
@@ -22,7 +22,7 @@
   fit_modelA_diff <- sem(modelA_diff, 
                          missing = "ML", 
                          estimator = "MLR", 
-                         data = alldata, 
+                         data = alldata_new, 
                          cluster = "m_id",
                          fixed.x = F)
 
@@ -37,7 +37,7 @@
   fit_modelB_diff <- sem(modelB_diff, 
                          missing = "ML", 
                          estimator = "MLR", 
-                         data = alldata, 
+                         data = alldata_new, 
                          cluster = "m_id",
                          fixed.x = F)
 
@@ -58,7 +58,7 @@
   fit_modelA_tot <- sem(modelA_tot, 
                         missing = "ML", 
                         estimator = "MLR", 
-                        data = alldata, 
+                        data = alldata_new, 
                         cluster = "m_id",
                         fixed.x = F)
 
@@ -71,7 +71,7 @@
   fit_modelB_tot <- sem(modelB_tot, 
                         missing = "ML", 
                         estimator = "MLR", 
-                        data = alldata, 
+                        data = alldata_new, 
                         cluster = "m_id",
                         fixed.x = F)
 
@@ -95,7 +95,7 @@
   fit_modelA_diff_noage <- sem(modelA_diff_noage, 
                                missing = "ML", 
                                estimator = "MLR", 
-                               data = alldata, 
+                               data = alldata_new, 
                                cluster = "m_id",
                                fixed.x = F)
 
@@ -112,7 +112,7 @@
   fit_modelA_tot_noage <- sem(modelA_tot_noage, 
                               missing = "ML", 
                               estimator = "MLR", 
-                              data = alldata, 
+                              data = alldata_new, 
                               cluster="m_id",
                               fixed.x=F)
 # compare the models
@@ -127,7 +127,7 @@
   fit_modelB_both <- sem(modelB_both, 
                          missing = "ML", 
                          estimator = "MLR", 
-                         data = alldata, 
+                         data = alldata_new, 
                          cluster = "m_id",
                          fixed.x = F)
 
@@ -135,7 +135,7 @@
   
   summary(fit_modelB_both, fit.measures = TRUE, std = TRUE)
   
-# create basic LGM plot based on the selected diff model ####
+# create basic LGM plot (for suppl.) based on the selected diff model ####
   
 # convert path data-frame to node and edge data-frame
   fit_modelA_diff_noage %>% parameterestimates %>% sample_n(5)

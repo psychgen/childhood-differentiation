@@ -1,0 +1,597 @@
+TITLE: allpred_lgm_ext_int_sensitivity_2l
+DATA: FILE = "//ess01/p471/data/durable/projects/childhood_differentiation/
+scripts/mplus/data/data_for_mlevel_SIBSONLY_sensitivity.dat";
+VARIABLE: 
+NAMES = ind_id m_id sex parity BARN_NR age1 age2 age3 int1 int2 int3 ext1 ext2 ext3
+     inat_8yr hyp_8yr cd_8yr odd_8yr dep_8yr anx_8yr dx_dep dx_anx dx_dbd dx_adhd x1
+     x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 ipsw;  
+MISSING=.;
+USEVARIABLES= sex parity x1-x16 ext1 ext2 ext3 int1 int2 int3 ;
+WITHIN=sex parity;
+CLUSTER=m_id;
+WEIGHT=ipsw;
+WTSCALE=UNSCALED;
+
+ANALYSIS: 
+TYPE = TWOLEVEL RANDOM;
+!ESTIMATOR = BAYES;
+MITERATIONS = 10000;
+!ALGORITHM = INTEGRATION;
+!INTEGRATION = 10;
+MCONVERGENCE = 0.015;
+LOGCRITERION = 0.005; 
+H1ITERATIONS = 1;
+PROCESSORS = 5;
+
+MODEL:
+%WITHIN%
+
+!Growth factors at within level 
+
+i1w s1w | ext1@-3.5 ext2@-2 ext3@0;
+i2w s2w | int1@-3.5 int2@-2 int3@0;
+
+!Effect covariates - within level
+i1w ON sex;
+s1w ON sex;
+i1w ON parity;
+s1w ON parity;
+i2w ON sex;
+s2w ON sex;
+i2w ON parity;
+s2w ON parity;
+
+!Main effects - within level
+i1w ON x1-x16 (bi1w_1-bi1w_16);
+s1w ON x1-x16 (bs1w_1-bs1w_16);
+i2w ON x1-x16 (bi2w_1-bi2w_16);
+s2w ON x1-x16 (bs2w_1-bs2w_16);
+
+!Variance covariates - within level
+x1-x16 (ew1-ew16);
+
+!Covariance covariates - within level
+x1-x16 WITH x1-x16;
+
+!Residual variances - ind level
+ext1 (res_e1_w);
+ext2 (res_e2_w);
+ext3 (res_e3_w);
+int1 (res_i1_w);
+int2 (res_i2_w);
+int3 (res_i3_w);
+
+%BETWEEN%
+
+!Growth factors at between level 
+
+i1b s1b | ext1@-3.5 ext2@-2 ext3@0;
+i2b s2b | int1@-3.5 int2@-2 int3@0;
+
+!Latent variances at between level predictors
+
+xb1 BY x1@1;
+xb2 BY x2@1;
+xb3 BY x3@1;
+xb4 BY x4@1;
+xb5 BY x5@1;
+xb6 BY x6@1;
+xb7 BY x7@1;
+xb8 BY x8@1;
+xb9 BY x9@1;
+xb10 BY x10@1;
+xb11 BY x11@1;
+xb12 BY x12@1;
+xb13 BY x13@1;
+xb14 BY x14@1;
+xb15 BY x15@1;
+xb16 BY x16@1;
+
+!Direct effect of between level component on outcome (estimated)
+xb1-xb16 BY i1b* (bi1b_1-bi1b_16);
+xb1-xb16 BY s1b* (bs1b_1-bs1b_16);
+xb1-xb16 BY i2b* (bi2b_1-bi2b_16);
+xb1-xb16 BY s2b* (bs2b_1-bs2b_16);
+
+!Indirect effect - between level
+i1b ON x1-x16 (bi1w_1-bi1w_16);
+s1b ON x1-x16 (bs1w_1-bs1w_16);
+i2b ON x1-x16 (bi2w_1-bi2w_16);
+s2b ON x1-x16 (bs2w_1-bs2w_16);
+
+!Latent variance component mean @ 0
+[ xb1-xb16@0 ];
+
+!Between level predictor variance @ 0 
+x1-x16@0;
+
+!Variance latent variable maternal var
+xb1-xb16 (vb1-vb16);
+
+!Residual variances - between level
+ext1@0 (res_e1_b);
+ext2@0 (res_e2_b);
+ext3@0 (res_e3_b);
+int1@0 (res_i1_b);
+int2@0 (res_i2_b);
+int3@0 (res_i3_b);
+
+!Between level growth factor variances
+i1b (vint1b) ; 
+s1b (vslo1b) ;
+i2b (vint2b) ; 
+s2b (vslo2b) ;
+
+!Between level growth factor means
+[i1b] (mint1b) ; 
+[s1b] (mslo1b) ;
+[i2b] (mint2b) ; 
+[s2b] (mslo2b) ;
+
+!Estimate means at this level
+[ x1-x16 ];
+
+
+
+MODEL CONSTRAINT:
+NEW(mvar1 vb1_std ew1_std bi1w_1_std bs1w_1_std bi1b_1_std bs1b_1_std 
+bi1b_ind_1_std bs1b_ind_1_std bi2w_1_std bs2w_1_std bi2b_1_std bs2b_1_std 
+bi2b_ind_1_std bs2b_ind_1_std mvar2 vb2_std ew2_std bi1w_2_std bs1w_2_std 
+bi1b_2_std bs1b_2_std bi1b_ind_2_std bs1b_ind_2_std bi2w_2_std bs2w_2_std
+bi2b_2_std bs2b_2_std bi2b_ind_2_std bs2b_ind_2_std mvar3 vb3_std ew3_std 
+bi1w_3_std bs1w_3_std bi1b_3_std bs1b_3_std bi1b_ind_3_std bs1b_ind_3_std
+bi2w_3_std bs2w_3_std bi2b_3_std bs2b_3_std bi2b_ind_3_std bs2b_ind_3_std mvar4
+vb4_std ew4_std bi1w_4_std bs1w_4_std bi1b_4_std bs1b_4_std bi1b_ind_4_std 
+bs1b_ind_4_std bi2w_4_std bs2w_4_std bi2b_4_std bs2b_4_std bi2b_ind_4_std 
+bs2b_ind_4_std mvar5 vb5_std ew5_std bi1w_5_std bs1w_5_std bi1b_5_std bs1b_5_std
+bi1b_ind_5_std bs1b_ind_5_std bi2w_5_std bs2w_5_std bi2b_5_std bs2b_5_std 
+bi2b_ind_5_std bs2b_ind_5_std mvar6 vb6_std ew6_std bi1w_6_std bs1w_6_std 
+bi1b_6_std bs1b_6_std bi1b_ind_6_std bs1b_ind_6_std bi2w_6_std bs2w_6_std
+bi2b_6_std bs2b_6_std bi2b_ind_6_std bs2b_ind_6_std mvar7 vb7_std ew7_std 
+bi1w_7_std bs1w_7_std bi1b_7_std bs1b_7_std bi1b_ind_7_std bs1b_ind_7_std
+bi2w_7_std bs2w_7_std bi2b_7_std bs2b_7_std bi2b_ind_7_std bs2b_ind_7_std mvar8
+vb8_std ew8_std bi1w_8_std bs1w_8_std bi1b_8_std bs1b_8_std bi1b_ind_8_std);
+NEW(bs1b_ind_8_std bi2w_8_std bs2w_8_std bi2b_8_std bs2b_8_std bi2b_ind_8_std 
+bs2b_ind_8_std mvar9 vb9_std ew9_std bi1w_9_std bs1w_9_std bi1b_9_std bs1b_9_std
+ bi1b_ind_9_std bs1b_ind_9_std bi2w_9_std bs2w_9_std bi2b_9_std bs2b_9_std 
+bi2b_ind_9_std bs2b_ind_9_std mvar10 vb10_std ew10_std bi1w_10_std bs1w_10_std
+bi1b_10_std bs1b_10_std bi1b_ind_10_std bs1b_ind_10_std bi2w_10_std bs2w_10_std
+bi2b_10_std bs2b_10_std bi2b_ind_10_std bs2b_ind_10_std mvar11 vb11_std ew11_std
+bi1w_11_std bs1w_11_std bi1b_11_std bs1b_11_std bi1b_ind_11_std bs1b_ind_11_std
+bi2w_11_std bs2w_11_std bi2b_11_std bs2b_11_std bi2b_ind_11_std bs2b_ind_11_std
+mvar12 vb12_std ew12_std bi1w_12_std bs1w_12_std bi1b_12_std bs1b_12_std 
+bi1b_ind_12_std bs1b_ind_12_std bi2w_12_std bs2w_12_std bi2b_12_std bs2b_12_std 
+bi2b_ind_12_std bs2b_ind_12_std mvar13 vb13_std ew13_std bi1w_13_std bs1w_13_std
+bi1b_13_std bs1b_13_std bi1b_ind_13_std bs1b_ind_13_std bi2w_13_std bs2w_13_std
+bi2b_13_std bs2b_13_std bi2b_ind_13_std bs2b_ind_13_std mvar14 vb14_std ew14_std
+bi1w_14_std bs1w_14_std bi1b_14_std bs1b_14_std bi1b_ind_14_std bs1b_ind_14_std
+bi2w_14_std bs2w_14_std bi2b_14_std bs2b_14_std bi2b_ind_14_std bs2b_ind_14_std 
+mvar15 vb15_std ew15_std bi1w_15_std bs1w_15_std bi1b_15_std bs1b_15_std 
+bi1b_ind_15_std bs1b_ind_15_std bi2w_15_std bs2w_15_std bi2b_15_std bs2b_15_std
+bi2b_ind_15_std bs2b_ind_15_std mvar16 vb16_std ew16_std bi1w_16_std bs1w_16_std
+bi1b_16_std bs1b_16_std bi1b_ind_16_std bs1b_ind_16_std bi2w_16_std bs2w_16_std
+bi2b_16_std bs2b_16_std bi2b_ind_16_std bs2b_ind_16_std);
+
+! Predictor x1
+! Define total maternal variance across levels
+mvar1= vb1 + ew1;
+! Standardise each variance component 
+vb1_std= vb1 /mvar1;
+ew1_std=ew1/mvar1;
+! Standardise each effect estimate
+bi1w_1_std=bi1w_1*mvar1;
+bs1w_1_std=bs1w_1*mvar1;
+bi1b_1_std=bi1b_1*mvar1;
+bs1b_1_std=bs1b_1*mvar1;
+bi1b_ind_1_std=bi1w_1*vb1;
+bs1b_ind_1_std=bs1w_1*vb1;
+bi2w_1_std=bi2w_1*mvar1;
+bs2w_1_std=bs2w_1*mvar1;
+bi2b_1_std=bi2b_1*mvar1;
+bs2b_1_std=bs2b_1*mvar1;
+bi2b_ind_1_std=bi2w_1*vb1;
+bs2b_ind_1_std=bs2w_1*vb1;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_1;
+!0=bs1b_1;
+!0=bi2b_1;
+!0=bs2b_1;
+!0=vintb;
+!0=vslob;
+!0=vb1;
+
+! Predictor x2
+! Define total maternal variance across levels
+mvar2= vb2 + ew2;
+! Standardise each variance component 
+vb2_std= vb2 /mvar2;
+ew2_std=ew2/mvar2;
+! Standardise each effect estimate
+bi1w_2_std=bi1w_2*mvar2;
+bs1w_2_std=bs1w_2*mvar2;
+bi1b_2_std=bi1b_2*mvar2;
+bs1b_2_std=bs1b_2*mvar2;
+bi1b_ind_2_std=bi1w_2*vb2;
+bs1b_ind_2_std=bs1w_2*vb2;
+bi2w_2_std=bi2w_2*mvar2;
+bs2w_2_std=bs2w_2*mvar2;
+bi2b_2_std=bi2b_2*mvar2;
+bs2b_2_std=bs2b_2*mvar2;
+bi2b_ind_2_std=bi2w_2*vb2;
+bs2b_ind_2_std=bs2w_2*vb2;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_2;
+!0=bs1b_2;
+!0=bi2b_2;
+!0=bs2b_2;
+!0=vb2;
+
+! Predictor x3
+! Define total maternal variance across levels
+mvar3= vb3 + ew3;
+! Standardise each variance component 
+vb3_std= vb3 /mvar3;
+ew3_std=ew3/mvar3;
+! Standardise each effect estimate
+bi1w_3_std=bi1w_3*mvar3;
+bs1w_3_std=bs1w_3*mvar3;
+bi1b_3_std=bi1b_3*mvar3;
+bs1b_3_std=bs1b_3*mvar3;
+bi1b_ind_3_std=bi1w_3*vb3;
+bs1b_ind_3_std=bs1w_3*vb3;
+bi2w_3_std=bi2w_3*mvar3;
+bs2w_3_std=bs2w_3*mvar3;
+bi2b_3_std=bi2b_3*mvar3;
+bs2b_3_std=bs2b_3*mvar3;
+bi2b_ind_3_std=bi2w_3*vb3;
+bs2b_ind_3_std=bs2w_3*vb3;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_3;
+!0=bs1b_3;
+!0=bi2b_3;
+!0=bs2b_3;
+!0=vb3;
+
+! Predictor x4
+! Define total maternal variance across levels
+mvar4= vb4 + ew4;
+! Standardise each variance component 
+vb4_std= vb4 /mvar4;
+ew4_std=ew4/mvar4;
+! Standardise each effect estimate
+bi1w_4_std=bi1w_4*mvar4;
+bs1w_4_std=bs1w_4*mvar4;
+bi1b_4_std=bi1b_4*mvar4;
+bs1b_4_std=bs1b_4*mvar4;
+bi1b_ind_4_std=bi1w_4*vb4;
+bs1b_ind_4_std=bs1w_4*vb4;
+bi2w_4_std=bi2w_4*mvar4;
+bs2w_4_std=bs2w_4*mvar4;
+bi2b_4_std=bi2b_4*mvar4;
+bs2b_4_std=bs2b_4*mvar4;
+bi2b_ind_4_std=bi2w_4*vb4;
+bs2b_ind_4_std=bs2w_4*vb4;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_4;
+!0=bs1b_4;
+!0=bi2b_4;
+!0=bs2b_4;
+!0=vb4;
+
+! Predictor x5
+! Define total maternal variance across levels
+mvar5= vb5 + ew5;
+! Standardise each variance component 
+vb5_std= vb5 /mvar5;
+ew5_std=ew5/mvar5;
+! Standardise each effect estimate
+bi1w_5_std=bi1w_5*mvar5;
+bs1w_5_std=bs1w_5*mvar5;
+bi1b_5_std=bi1b_5*mvar5;
+bs1b_5_std=bs1b_5*mvar5;
+bi1b_ind_5_std=bi1w_5*vb5;
+bs1b_ind_5_std=bs1w_5*vb5;
+bi2w_5_std=bi2w_5*mvar5;
+bs2w_5_std=bs2w_5*mvar5;
+bi2b_5_std=bi2b_5*mvar5;
+bs2b_5_std=bs2b_5*mvar5;
+bi2b_ind_5_std=bi2w_5*vb5;
+bs2b_ind_5_std=bs2w_5*vb5;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_5;
+!0=bs1b_5;
+!0=bi2b_5;
+!0=bs2b_5;
+!0=vb5;
+
+! Predictor x6
+! Define total maternal variance across levels
+mvar6= vb6 + ew6;
+! Standardise each variance component 
+vb6_std= vb6 /mvar6;
+ew6_std=ew6/mvar6;
+! Standardise each effect estimate
+bi1w_6_std=bi1w_6*mvar6;
+bs1w_6_std=bs1w_6*mvar6;
+bi1b_6_std=bi1b_6*mvar6;
+bs1b_6_std=bs1b_6*mvar6;
+bi1b_ind_6_std=bi1w_6*vb6;
+bs1b_ind_6_std=bs1w_6*vb6;
+bi2w_6_std=bi2w_6*mvar6;
+bs2w_6_std=bs2w_6*mvar6;
+bi2b_6_std=bi2b_6*mvar6;
+bs2b_6_std=bs2b_6*mvar6;
+bi2b_ind_6_std=bi2w_6*vb6;
+bs2b_ind_6_std=bs2w_6*vb6;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_6;
+!0=bs1b_6;
+!0=bi2b_6;
+!0=bs2b_6;
+!0=vb6;
+
+! Predictor x7
+! Define total maternal variance across levels
+mvar7= vb7 + ew7;
+! Standardise each variance component 
+vb7_std= vb7 /mvar7;
+ew7_std=ew7/mvar7;
+! Standardise each effect estimate
+bi1w_7_std=bi1w_7*mvar7;
+bs1w_7_std=bs1w_7*mvar7;
+bi1b_7_std=bi1b_7*mvar7;
+bs1b_7_std=bs1b_7*mvar7;
+bi1b_ind_7_std=bi1w_7*vb7;
+bs1b_ind_7_std=bs1w_7*vb7;
+bi2w_7_std=bi2w_7*mvar7;
+bs2w_7_std=bs2w_7*mvar7;
+bi2b_7_std=bi2b_7*mvar7;
+bs2b_7_std=bs2b_7*mvar7;
+bi2b_ind_7_std=bi2w_7*vb7;
+bs2b_ind_7_std=bs2w_7*vb7;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_7;
+!0=bs1b_7;
+!0=bi2b_7;
+!0=bs2b_7;
+!0=vb7;
+
+! Predictor x8
+! Define total maternal variance across levels
+mvar8= vb8 + ew8;
+! Standardise each variance component 
+vb8_std= vb8 /mvar8;
+ew8_std=ew8/mvar8;
+! Standardise each effect estimate
+bi1w_8_std=bi1w_8*mvar8;
+bs1w_8_std=bs1w_8*mvar8;
+bi1b_8_std=bi1b_8*mvar8;
+bs1b_8_std=bs1b_8*mvar8;
+bi1b_ind_8_std=bi1w_8*vb8;
+bs1b_ind_8_std=bs1w_8*vb8;
+bi2w_8_std=bi2w_8*mvar8;
+bs2w_8_std=bs2w_8*mvar8;
+bi2b_8_std=bi2b_8*mvar8;
+bs2b_8_std=bs2b_8*mvar8;
+bi2b_ind_8_std=bi2w_8*vb8;
+bs2b_ind_8_std=bs2w_8*vb8;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_8;
+!0=bs1b_8;
+!0=bi2b_8;
+!0=bs2b_8;
+!0=vb8;
+
+! Predictor x9
+! Define total maternal variance across levels
+mvar9= vb9 + ew9;
+! Standardise each variance component 
+vb9_std= vb9 /mvar9;
+ew9_std=ew9/mvar9;
+! Standardise each effect estimate
+bi1w_9_std=bi1w_9*mvar9;
+bs1w_9_std=bs1w_9*mvar9;
+bi1b_9_std=bi1b_9*mvar9;
+bs1b_9_std=bs1b_9*mvar9;
+bi1b_ind_9_std=bi1w_9*vb9;
+bs1b_ind_9_std=bs1w_9*vb9;
+bi2w_9_std=bi2w_9*mvar9;
+bs2w_9_std=bs2w_9*mvar9;
+bi2b_9_std=bi2b_9*mvar9;
+bs2b_9_std=bs2b_9*mvar9;
+bi2b_ind_9_std=bi2w_9*vb9;
+bs2b_ind_9_std=bs2w_9*vb9;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_9;
+!0=bs1b_9;
+!0=bi2b_9;
+!0=bs2b_9;
+!0=vb9;
+
+! Predictor x10
+! Define total maternal variance across levels
+mvar10= vb10 + ew10;
+! Standardise each variance component 
+vb10_std= vb10 /mvar10;
+ew10_std=ew10/mvar10;
+! Standardise each effect estimate
+bi1w_10_std=bi1w_10*mvar10;
+bs1w_10_std=bs1w_10*mvar10;
+bi1b_10_std=bi1b_10*mvar10;
+bs1b_10_std=bs1b_10*mvar10;
+bi1b_ind_10_std=bi1w_10*vb10;
+bs1b_ind_10_std=bs1w_10*vb10;
+bi2w_10_std=bi2w_10*mvar10;
+bs2w_10_std=bs2w_10*mvar10;
+bi2b_10_std=bi2b_10*mvar10;
+bs2b_10_std=bs2b_10*mvar10;
+bi2b_ind_10_std=bi2w_10*vb10;
+bs2b_ind_10_std=bs2w_10*vb10;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_10;
+!0=bs1b_10;
+!0=bi2b_10;
+!0=bs2b_10;
+!0=vb10;
+
+! Predictor x11
+! Define total maternal variance across levels
+mvar11= vb11 + ew11;
+! Standardise each variance component 
+vb11_std= vb11 /mvar11;
+ew11_std=ew11/mvar11;
+! Standardise each effect estimate
+bi1w_11_std=bi1w_11*mvar11;
+bs1w_11_std=bs1w_11*mvar11;
+bi1b_11_std=bi1b_11*mvar11;
+bs1b_11_std=bs1b_11*mvar11;
+bi1b_ind_11_std=bi1w_11*vb11;
+bs1b_ind_11_std=bs1w_11*vb11;
+bi2w_11_std=bi2w_11*mvar11;
+bs2w_11_std=bs2w_11*mvar11;
+bi2b_11_std=bi2b_11*mvar11;
+bs2b_11_std=bs2b_11*mvar11;
+bi2b_ind_11_std=bi2w_11*vb11;
+bs2b_ind_11_std=bs2w_11*vb11;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_11;
+!0=bs1b_11;
+!0=bi2b_11;
+!0=bs2b_11;
+!0=vb11;
+
+! Predictor x12
+! Define total maternal variance across levels
+mvar12= vb12 + ew12;
+! Standardise each variance component 
+vb12_std= vb12 /mvar12;
+ew12_std=ew12/mvar12;
+! Standardise each effect estimate
+bi1w_12_std=bi1w_12*mvar12;
+bs1w_12_std=bs1w_12*mvar12;
+bi1b_12_std=bi1b_12*mvar12;
+bs1b_12_std=bs1b_12*mvar12;
+bi1b_ind_12_std=bi1w_12*vb12;
+bs1b_ind_12_std=bs1w_12*vb12;
+bi2w_12_std=bi2w_12*mvar12;
+bs2w_12_std=bs2w_12*mvar12;
+bi2b_12_std=bi2b_12*mvar12;
+bs2b_12_std=bs2b_12*mvar12;
+bi2b_ind_12_std=bi2w_12*vb12;
+bs2b_ind_12_std=bs2w_12*vb12;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_12;
+!0=bs1b_12;
+!0=bi2b_12;
+!0=bs2b_12;
+!0=vb12;
+
+! Predictor x13
+! Define total maternal variance across levels
+mvar13= vb13 + ew13;
+! Standardise each variance component 
+vb13_std= vb13 /mvar13;
+ew13_std=ew13/mvar13;
+! Standardise each effect estimate
+bi1w_13_std=bi1w_13*mvar13;
+bs1w_13_std=bs1w_13*mvar13;
+bi1b_13_std=bi1b_13*mvar13;
+bs1b_13_std=bs1b_13*mvar13;
+bi1b_ind_13_std=bi1w_13*vb13;
+bs1b_ind_13_std=bs1w_13*vb13;
+bi2w_13_std=bi2w_13*mvar13;
+bs2w_13_std=bs2w_13*mvar13;
+bi2b_13_std=bi2b_13*mvar13;
+bs2b_13_std=bs2b_13*mvar13;
+bi2b_ind_13_std=bi2w_13*vb13;
+bs2b_ind_13_std=bs2w_13*vb13;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_13;
+!0=bs1b_13;
+!0=bi2b_13;
+!0=bs2b_13;
+!0=vb13;
+
+! Predictor x14
+! Define total maternal variance across levels
+mvar14= vb14 + ew14;
+! Standardise each variance component 
+vb14_std= vb14 /mvar14;
+ew14_std=ew14/mvar14;
+! Standardise each effect estimate
+bi1w_14_std=bi1w_14*mvar14;
+bs1w_14_std=bs1w_14*mvar14;
+bi1b_14_std=bi1b_14*mvar14;
+bs1b_14_std=bs1b_14*mvar14;
+bi1b_ind_14_std=bi1w_14*vb14;
+bs1b_ind_14_std=bs1w_14*vb14;
+bi2w_14_std=bi2w_14*mvar14;
+bs2w_14_std=bs2w_14*mvar14;
+bi2b_14_std=bi2b_14*mvar14;
+bs2b_14_std=bs2b_14*mvar14;
+bi2b_ind_14_std=bi2w_14*vb14;
+bs2b_ind_14_std=bs2w_14*vb14;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_14;
+!0=bs1b_14;
+!0=bi2b_14;
+!0=bs2b_14;
+!0=vb14;
+
+! Predictor x15
+! Define total maternal variance across levels
+mvar15= vb15 + ew15;
+! Standardise each variance component 
+vb15_std= vb15 /mvar15;
+ew15_std=ew15/mvar15;
+! Standardise each effect estimate
+bi1w_15_std=bi1w_15*mvar15;
+bs1w_15_std=bs1w_15*mvar15;
+bi1b_15_std=bi1b_15*mvar15;
+bs1b_15_std=bs1b_15*mvar15;
+bi1b_ind_15_std=bi1w_15*vb15;
+bs1b_ind_15_std=bs1w_15*vb15;
+bi2w_15_std=bi2w_15*mvar15;
+bs2w_15_std=bs2w_15*mvar15;
+bi2b_15_std=bi2b_15*mvar15;
+bs2b_15_std=bs2b_15*mvar15;
+bi2b_ind_15_std=bi2w_15*vb15;
+bs2b_ind_15_std=bs2w_15*vb15;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_15;
+!0=bs1b_15;
+!0=bi2b_15;
+!0=bs2b_15;
+!0=vb15;
+
+! Predictor x16
+! Define total maternal variance across levels
+mvar16= vb16 + ew16;
+! Standardise each variance component 
+vb16_std= vb16 /mvar16;
+ew16_std=ew16/mvar16;
+! Standardise each effect estimate
+bi1w_16_std=bi1w_16*mvar16;
+bs1w_16_std=bs1w_16*mvar16;
+bi1b_16_std=bi1b_16*mvar16;
+bs1b_16_std=bs1b_16*mvar16;
+bi1b_ind_16_std=bi1w_16*vb16;
+bs1b_ind_16_std=bs1w_16*vb16;
+bi2w_16_std=bi2w_16*mvar16;
+bs2w_16_std=bs2w_16*mvar16;
+bi2b_16_std=bi2b_16*mvar16;
+bs2b_16_std=bs2b_16*mvar16;
+bi2b_ind_16_std=bi2w_16*vb16;
+bs2b_ind_16_std=bs2w_16*vb16;
+! Fix all between params to 0 (reverts to one-level estimates)
+!0=bi1b_16;
+!0=bs1b_16;
+!0=bi2b_16;
+!0=bs2b_16;
+!0=vb16;
+
+output:  sampstat TECH1 TECH8 SVALUES CINTERVAL;
+
+savedata: FORMAT IS f10.5;
+results are allpred_lgm_ext_int_2l_decimals.dat;
+
